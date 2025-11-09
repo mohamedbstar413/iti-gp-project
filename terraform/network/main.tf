@@ -88,13 +88,13 @@ resource "aws_subnet" "public_subnets" {
 }
 
 resource "aws_route_table_association" "iti_public_rt_assoc" {
-  for_each =                aws_subnet.public_subnets
-  subnet_id =               each.value.id
+  count =                   var.num_public_subnets
+  subnet_id =               aws_subnet.public_subnets[count.index].id
   route_table_id =          aws_route_table.iti_public_route_table.id
 }
 
 resource "aws_route_table_association" "iti_private_rt_assoc" {
-  for_each =                aws_subnet.private_subnets
-  subnet_id =               each.value.id
+  count =                   var.num_private_subnets
+  subnet_id =               aws_subnet.private_subnets[count.index].id
   route_table_id =          aws_route_table.iti_private_route_table.id
 }
