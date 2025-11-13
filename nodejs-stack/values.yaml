@@ -1,0 +1,42 @@
+# values.yaml
+mysql:
+  image: mysql:8.0
+  rootPassword: "temp-root-pass" 
+  database: myapp_db
+  user: appuser
+  password: "temp-pass"
+  persistence:
+    enabled: true
+    size: 5Gi
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+
+redis:
+  image: redis:7.0-alpine
+  persistence:
+    enabled: true
+    size: 2Gi
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "50m"
+
+app:
+  image:
+    repository: nodejs-app
+    tag: local
+  replicaCount: 2
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+  env:
+    DB_HOST: mysql
+    DB_USER: appuser
+    DB_NAME: myapp_db
+    REDIS_HOST: redis
+  service:
+    type: ClusterIP
+    port: 3000
