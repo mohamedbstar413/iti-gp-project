@@ -54,7 +54,7 @@ pipeline {
         AWS_REGION = 'us-east-1'
         GIT_REPO = 'https://github.com/mohamedbstar413/todo-app-pipeline.git'
         GIT_BRANCH = 'main'
-        IMAGE_TAG = "${env.BUILD_NUMBER}"
+        IMAGE_TAG = "v-${env.BUILD_NUMBER}"
         SMOKE_TEST_URL = ''
         AWS_ACCOUNT_ID   = "910148268074"
         
@@ -62,7 +62,6 @@ pipeline {
         ECR_REGISTRY     = "${AWS_ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com"
         EKS_CLUSTER_NAME = 'iti-gp-cluster'
 
-        IMAGE_TAG        = "v${BUILD_NUMBER}.0.0"
         IMAGE_NAME       = "${ECR_REGISTRY}/${ECR_REPOSITORY}:${IMAGE_TAG}"
         IMAGE_LATEST     = "${ECR_REGISTRY}/${ECR_REPOSITORY}:latest"
         DOCKERFILE_PATH  = 'nodeapp/dockerfile'
