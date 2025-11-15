@@ -114,7 +114,7 @@ resource "kubectl_manifest" "back_app" {
 
       "destination" = {
         "server"    = "https://kubernetes.default.svc"
-        "namespace" = "db-ns"
+        "namespace" = "back-ns"
       }
 
       "syncPolicy" = {
