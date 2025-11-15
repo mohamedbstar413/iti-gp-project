@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nodejs-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: nodejs-app
+  template:
+    metadata:
+      labels:
+        app: nodejs-app
+    spec:
+      containers:
+      - name: nginx
+        image: nginx
+        
+      - name: app
+        image: bstar999/iti-gp-image
+        ports:
+        - containerPort: 3000
+        env:
+        - name: DB_HOST
+          value: mysql.db-ns.svc.cluster.local
+        - name: DB_USER
+          value: admin
+        - name: DB_PASS
+          valueFrom:
+            secretKeyRef:
+              name: db-secrets
+              key: password
+        #- name: REDIS_HOST
+        #  value: "{{ .Values.app.env.REDIS_HOST }}"
+        resources:
+          requests:
+            memory: 500Mi
+            cpu: 0.5
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 10
