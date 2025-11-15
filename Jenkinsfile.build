@@ -76,6 +76,16 @@ pipeline {
                 git branch: "$GIT_BRANCH", url: "$GIT_REPO"
             }
         }
+        stage('Debug workspace') {
+            steps {
+                container('tester') {
+                    sh '''
+                        echo "WORKSPACE=${WORKSPACE}"
+                        ls -R ${WORKSPACE}
+                    '''
+                }
+            }
+        }
         // Build image and push to ecr
         stage('🚀 Build & Push with Kaniko') {
             steps {
