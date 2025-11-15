@@ -1,3 +1,51 @@
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+    }
+    kubernetes = {
+      source  = "hashicorp/kubernetes"
+      version = "~> 2.23"
+    }
+    helm = {
+      source  = "hashicorp/helm"
+      version = "~> 2.11"
+    }
+    kubectl = {
+      source  = "gavinbunney/kubectl"
+      version = "~> 1.14"
+    }
+    tls = {
+      source  = "hashicorp/tls"
+    }
+    null = {
+      source  = "hashicorp/null"
+    }
+  }
+}
+
+provider "kubernetes" {
+  host                   = aws_eks_cluster.iti_gp_cluster.endpoint
+  cluster_ca_certificate = base64decode(aws_eks_cluster.iti_gp_cluster.certificate_authority[0].data)
+  token                  = data.aws_eks_cluster_auth.iti_gp_cluster.token
+}
+
+provider "helm" {
+  kubernetes {
+    host                   = aws_eks_cluster.iti_gp_cluster.endpoint
+    cluster_ca_certificate = base64decode(aws_eks_cluster.iti_gp_cluster.certificate_authority[0].data)
+    token                  = data.aws_eks_cluster_auth.iti_gp_cluster.token
+  }
+}
+
+provider "kubectl" {
+  alias                  = "eks"
+  host                   = aws_eks_cluster.iti_gp_cluster.endpoint
+  cluster_ca_certificate = base64decode(aws_eks_cluster.iti_gp_cluster.certificate_authority[0].data)
+  token                  = data.aws_eks_cluster_auth.iti_gp_cluster.token
+  load_config_file       = false
+}
+
 resource "aws_eks_cluster" "iti_gp_cluster" {
   name =                    var.cluster_name
   role_arn =                data.aws_iam_role.cluster_role.arn
@@ -10,12 +58,16 @@ resource "aws_eks_cluster" "iti_gp_cluster" {
   }
 }
 
-
 resource "aws_iam_openid_connect_provider" "oidc" {
-  url             = aws_eks_cluster.iti_gp_cluster.identity[0].oidc[0].issuer
-  client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = [ data.tls_certificate.eks.certificates[0].sha1_fingerprint ]
+  depends_on = [aws_eks_cluster.iti_gp_cluster]
+
+  url = aws_eks_cluster.iti_gp_cluster.identity[0].oidc[0].issuer
+
+  client_id_list = ["sts.amazonaws.com"]
+
+  thumbprint_list = [data.tls_certificate.eks.certificates[0].sha1_fingerprint]
 }
+
 
 /*
                 NodeGroup
