@@ -52,7 +52,7 @@ pipeline {
     environment {
         
         AWS_REGION = 'us-east-1'
-        GIT_REPO = 'https://github.com/mohamedbstar413/todo-app-pipeline.git'
+        GIT_REPO = 'https://github.com/mohamedbstar413/iti-gp-cluster.git'
         GIT_BRANCH = 'main'
         IMAGE_TAG = "v-${env.BUILD_NUMBER}"
         SMOKE_TEST_URL = ''
