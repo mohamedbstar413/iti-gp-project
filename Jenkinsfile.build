@@ -81,7 +81,7 @@ pipeline {
                 container('tester') {
                     sh '''
                         echo "WORKSPACE=${WORKSPACE}"
-                        ls -R ${WORKSPACE}
+                        ls ${WORKSPACE}
                     '''
                 }
             }
@@ -95,7 +95,7 @@ pipeline {
                             set -e
                             /kaniko/executor \
                             --context ${WORKSPACE}/${BUILD_CONTEXT} \
-                            --dockerfile ${DOCKERFILE_PATH} \
+                            --dockerfile ${BUILD_CONTEXT}/${DOCKERFILE_PATH} \
                             --destination ${IMAGE_NAME} \
                             --destination ${IMAGE_LATEST} \
                             --cache=true \
