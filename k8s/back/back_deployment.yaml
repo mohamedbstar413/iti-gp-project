@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nodejs-app
+  namespace: back-ns
 spec:
   replicas: 3
   selector:
@@ -17,7 +18,7 @@ spec:
         image: nginx
         
       - name: app
-        image: bstar999/iti-gp-image
+        image: 910148268074.dkr.ecr.us-east-1.amazonaws.com/iti-gp-image:latest
         ports:
         - containerPort: 3000
         env:
