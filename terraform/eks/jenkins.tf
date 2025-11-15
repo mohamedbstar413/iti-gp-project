@@ -20,12 +20,14 @@ resource "null_resource" "jenkins_pv_pvc_maker" {
   }
 }
 
+
+
 resource "kubernetes_service_account" "jenkins" {
   metadata {
     name      = "jenkins"
     namespace = kubernetes_namespace.jenkins.metadata[0].name
     annotations = {
-      #"eks.amazonaws.com/role-arn" = aws_iam_role.ecr_role.arn
+      "eks.amazonaws.com/role-arn" = aws_iam_role.jenkins_ecr_role.arn
     }
   }
 }
