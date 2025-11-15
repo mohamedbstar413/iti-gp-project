@@ -20,7 +20,7 @@ spec:
     }
 
     environment {
-        ECR_REPO = '609854511954.dkr.ecr.us-east-1.amazonaws.com/iti-gp-project'
+        ECR_REPO = '910148268074.dkr.ecr.us-east-1.amazonaws.com/iti-gp-project'
         AWS_REGION = 'us-east-1'
         IMAGE_TAG = "${BUILD_NUMBER}"
         TELEGRAM_BOT_TOKEN = credentials('telegram-bot-token')
@@ -31,7 +31,7 @@ spec:
 
         stage('Clone Repository') {
             steps {
-                git branch: 'main', url: 'https://github.com/mohammad-alaa-ma/iti-gp-project.git'
+                git branch: 'main', url: 'https://github.com/mohamedbstar413/iti-gp-project.git'
             }
         }
 
