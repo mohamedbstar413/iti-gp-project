@@ -48,6 +48,7 @@ resource "helm_release" "argocd" {
 #ecr registry
 resource "aws_ecr_repository" "backend" {
   name = "iti-gp-image"
+  force_delete = true
 }
 
 resource "kubectl_manifest" "db_app" {

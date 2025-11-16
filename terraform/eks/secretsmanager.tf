@@ -55,35 +55,123 @@ resource "aws_iam_role_policy_attachment" "db_secret_role_policy_attachment" {
                         install secerts inside the kubernetes cluster
 */
 
-locals {
-  db_secret_json = jsondecode(aws_secretsmanager_secret_version.db_secret_version.secret_string)
+resource "helm_release" "secrets_store_csi_driver" {
+  name       = "secrets-store-csi-driver"
+  repository = "https://kubernetes-sigs.github.io/secrets-store-csi-driver/charts"
+  chart      = "secrets-store-csi-driver"
+  namespace  = "kube-system"
+  version    = "1.4.5"
+
+  set {
+    name  = "syncSecret.enabled"
+    value = "true"
+  }
+
 }
 
-resource "kubernetes_secret" "db_secrets" {
-  metadata {
-    name      = "db-secrets"
-    namespace = kubernetes_namespace.db_ns.metadata[0].name
-  }
+resource "helm_release" "csi_aws_provider" {
+  name       = "secrets-provider-aws"
+  repository = "https://aws.github.io/secrets-store-csi-driver-provider-aws"
+  chart      = "secrets-store-csi-driver-provider-aws"
+  namespace  = "kube-system"
+  version    = "0.3.0"
 
-  data = {
-    username = local.db_secret_json["username"]
-    password = local.db_secret_json["password"]
-  }
-
-  type = "Opaque"
+  depends_on = [
+    helm_release.secrets_store_csi_driver
+  ]
 }
 
 
-resource "kubernetes_secret" "db_secrets_back_ns" {
+resource "kubernetes_service_account" "csi_aws_provider_sa" {
   metadata {
-    name      = "db-secrets"
-    namespace = kubernetes_namespace.back_ns.metadata[0].name
-  }
+    name      = "secrets-store-csi-driver-sa"
+    namespace = "kube-system"
 
-  data = {
-    username = local.db_secret_json["username"]
-    password = local.db_secret_json["password"]
+    annotations = {
+      "eks.amazonaws.com/role-arn" = aws_iam_role.db_secret_role.arn
+    }
   }
+}
 
-  type = "Opaque"
+resource "kubectl_manifest" "mysql_secret_provider" {
+  yaml_body = yamlencode({
+    apiVersion = "secrets-store.csi.x-k8s.io/v1"
+    kind       = "SecretProviderClass"
+    metadata = {
+      name      = "mysql-secret-provider"
+      namespace = kubernetes_namespace.db_ns.metadata[0].name
+    }
+    spec = {
+      provider = "aws"
+
+      parameters = {
+        objects = yamlencode([
+          {
+            objectName = aws_secretsmanager_secret.db_secret.name
+            objectType = "secretsmanager"
+          }
+        ])
+      }
+
+      # Sync to Kubernetes Secret
+      secretObjects = [
+        {
+          secretName = "mysql-credentials"
+          type       = "Opaque"
+          data = [
+            {
+              objectName = aws_secretsmanager_secret.db_secret.name
+              key        = "username"
+            },
+            {
+              objectName = aws_secretsmanager_secret.db_secret.name
+              key        = "password"
+            }
+          ]
+        }
+      ]
+    }
+  })
+}
+
+resource "kubectl_manifest" "mysql_secret_provider_back_ns" {
+
+  yaml_body = yamlencode({
+    apiVersion = "secrets-store.csi.x-k8s.io/v1"
+    kind       = "SecretProviderClass"
+    metadata = {
+      name      = "mysql-secret-provider"
+      namespace = kubernetes_namespace.back_ns.metadata[0].name
+    }
+    spec = {
+      provider = "aws"
+
+      parameters = {
+        objects = yamlencode([
+          {
+            objectName = aws_secretsmanager_secret.db_secret.name
+            objectType = "secretsmanager"
+          }
+        ])
+      }
+
+      # Sync to Kubernetes Secret
+      secretObjects = [
+        {
+          secretName = "mysql-credentials"
+          type       = "Opaque"
+          data = [
+            {
+              objectName = aws_secretsmanager_secret.db_secret.name
+              key        = "username"
+            },
+            {
+              objectName = aws_secretsmanager_secret.db_secret.name
+              key        = "password"
+            }
+          ]
+        }
+      ]
+    }
+  })
 }

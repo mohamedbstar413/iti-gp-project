@@ -21,3 +21,8 @@ variable "db_password" {
 variable "git_token" {
   type = string
 }
+
+variable "aws_region" {
+  type = string
+  default = "us-east-1"
+}
