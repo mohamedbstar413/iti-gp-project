@@ -1,59 +1,68 @@
+{{- $fullName := include "nodejs-stack.fullname" . -}}
+{{- $svcName := printf "%s-nodejs-app" $fullName -}}
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: nodejs-app
+  name: {{ $svcName }}
+  labels:
+    {{- include "nodejs-stack.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.app.replicaCount }}
   selector:
     matchLabels:
-      app: nodejs-app
+      app.kubernetes.io/name: {{ include "nodejs-stack.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
   template:
     metadata:
       labels:
-        app: nodejs-app
+        app.kubernetes.io/name: {{ include "nodejs-stack.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
       containers:
-      - name: app
-        image: "{{ .Values.app.image.repository }}:{{ .Values.app.image.tag }}"
-        ports:
-        - containerPort: 3000
-        env:
-        - name: DB_HOST
-          value: "{{ .Values.app.env.DB_HOST }}"
-        - name: DB_USER
-          value: "{{ .Values.app.env.DB_USER }}"
-        - name: DB_NAME
-          value: "{{ .Values.app.env.DB_NAME }}"
-        - name: DB_PASS
-          valueFrom:
-            secretKeyRef:
-              name: db-secrets
-              key: MYSQL_PASSWORD
-        - name: REDIS_HOST
-          value: "{{ .Values.app.env.REDIS_HOST }}"
-        resources:
-          requests:
-            memory: "{{ .Values.app.resources.requests.memory }}"
-            cpu: "{{ .Values.app.resources.requests.cpu }}"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 3000
-          initialDelaySeconds: 30
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: 3000
-          initialDelaySeconds: 10
+        - name: app
+          image: "{{ .Values.app.image.repository }}:{{ .Values.app.image.tag }}"
+          ports:
+            - containerPort: 3000
+          env:
+            - name: DB_HOST
+              value: "{{ .Values.app.env.DB_HOST }}"
+            - name: DB_USER
+              value: "{{ .Values.app.env.DB_USER }}"
+            - name: DB_NAME
+              value: "{{ .Values.app.env.DB_NAME }}"
+            - name: DB_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: db-secrets
+                  key: MYSQL_PASSWORD
+            - name: REDIS_HOST
+              value: "{{ .Values.app.env.REDIS_HOST }}"
+          resources:
+            {{- toYaml .Values.app.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 3000
+            initialDelaySeconds: 10
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: nodejs-app
+  name: {{ $svcName }}
+  labels:
+    {{- include "nodejs-stack.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.app.service.type }}
   ports:
-  - port: {{ .Values.app.service.port }}
-    targetPort: 3000
+    - port: {{ .Values.app.service.port }}
+      targetPort: 3000
+      protocol: TCP
   selector:
-    app: nodejs-app
+    app.kubernetes.io/name: {{ include "nodejs-stack.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}

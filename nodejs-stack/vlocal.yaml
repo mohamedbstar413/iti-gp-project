@@ -1,7 +1,7 @@
-# values.yaml
+# vlocal.yaml
 mysql:
   image: mysql:8.0
-  rootPassword: "temp-root-pass" 
+  rootPassword: "temp-root-pass"
   database: myapp_db
   user: appuser
   password: "temp-pass"
@@ -40,19 +40,16 @@ app:
   service:
     type: ClusterIP
     port: 3000
+
 ingress:
-  enabled: false  #set to true when deploying with ingress
-  annotations:
-    kubernetes.io/ingress.class: nginx
-    cert-manager.io/cluster-issuer: letsencrypt-prod
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+  enabled: true
+  ingressClassName: nginx
+  tls: []
   hosts:
-    - host: app.yourdomain.dev  #replace with real domain
+    - host: ""
       paths:
         - path: /
           pathType: Prefix
-  tls:
-    - secretName: nodejs-app-tls
-      hosts:
-        - app.yourdomain.dev
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "false"
