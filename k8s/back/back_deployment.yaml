@@ -46,6 +46,10 @@ spec:
         env:
         - name: DB_HOST
           value: mysql.db-ns.svc.cluster.local
+        - name: REDIS_HOST
+          value: redis.db-ns.svc.cluster.local
+        - name: REDIS_PORT
+          value: "6379"
         - name: DB_USER
           valueFrom:
             secretKeyRef:
