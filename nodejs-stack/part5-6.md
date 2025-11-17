@@ -71,7 +71,7 @@ Secrets (e.g., database username/password) are **never hardcoded**. Instead, the
 
 ### 🔹 Database (`k8s/db/`)
 - **StatefulSet**: Ensures stable identity and ordered deployment for MySQL.
-- **PV/PVC**: Uses `hostPath` (`/tmp/my-pv`) for local development (replace with EBS/GPD in production).
+- **PV/PVC**: Uses `hostPath` (`/tmp/my-pv`) for local development (same storageClassName).
 - **NetworkPolicy**: Restricts MySQL access **only to backend pods** *(requires `namespaceSelector` fix for cross-namespace traffic)*.
 - **Service**: Internal DNS: `mysql.db-ns.svc.cluster.local:3306`.
 
