@@ -54,6 +54,7 @@ resource "helm_release" "argocd_image_updater" {
         }
     })
   ]
+  depends_on = [ kubernetes_namespace.argocd ]
 }
 
 

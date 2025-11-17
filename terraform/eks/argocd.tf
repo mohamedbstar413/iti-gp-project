@@ -45,11 +45,6 @@ resource "helm_release" "argocd" {
   ]
 }
 
-#ecr registry
-resource "aws_ecr_repository" "backend" {
-  name = "iti-gp-image"
-  force_delete = true
-}
 
 resource "kubectl_manifest" "db_app" {
   provider = kubectl.eks
@@ -97,7 +92,7 @@ resource "kubectl_manifest" "back_app" {
       "namespace" = "argocd"
       "annotations" = {
           # images to track: repository url
-          "argocd-image-updater.argoproj.io/image-list" = "${data.aws_caller_identity.current.account_id}.dkr.ecr.us-east-1.amazonaws.com/${aws_ecr_repository.backend.name}"
+          "argocd-image-updater.argoproj.io/image-list" = "910148268074.dkr.ecr.us-east-1.amazonaws.com/iti-gp-image:latest"
           # desired update strategy
           "argocd-image-updater.argoproj.io/backend.update-strategy" = "semver"
           # how to write back: "git" to commit to repo

@@ -1,12 +1,10 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: mysql-pvc
-  namespace: db-ns
+  name: redis-pvc
 spec:
-  storageClassName: ""
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: 1Gi 
+      storage: "1Gi"

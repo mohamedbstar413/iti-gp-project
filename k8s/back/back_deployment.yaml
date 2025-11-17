@@ -13,10 +13,32 @@ spec:
       labels:
         app: nodejs-app
     spec:
-      containers:
-      - name: nginx
-        image: nginx
+      serviceAccountName: "db-secret-sa"
+      initContainers:
+        - name: secret-mounter #this init container mounts the db-secrets so that the secrets get created before main container
+          image: busybox
+          command: ["sleep", "20"]
+          volumeMounts:
+            - name: secrets
+              mountPath: /mnt/secrets
         
+      containers:
+      -   name: nginx-container
+          image: nginx
+
+          volumeMounts:
+            - mountPath: /etc/nginx/nginx.conf
+              name: nginx-conf
+              subPath: nginx.conf #mount nginx.conf file only from the volume not the entire volume
+            
+            - mountPath: /usr/share/nginx/html/index.html
+              name: index
+              subPath: index.html
+          
+          ports:
+            - containerPort: 80
+              protocol: TCP
+
       - name: app
         image: 910148268074.dkr.ecr.us-east-1.amazonaws.com/iti-gp-image:latest
         ports:
@@ -25,14 +47,16 @@ spec:
         - name: DB_HOST
           value: mysql.db-ns.svc.cluster.local
         - name: DB_USER
-          value: admin
+          valueFrom:
+            secretKeyRef:
+              name: db-secret
+              key: password
         - name: DB_PASS
           valueFrom:
             secretKeyRef:
-              name: db-secrets
+              name: db-secret
               key: password
-        #- name: REDIS_HOST
-        #  value: "{{ .Values.app.env.REDIS_HOST }}"
+        
         resources:
           requests:
             memory: 500Mi
@@ -47,3 +71,29 @@ spec:
             path: /health
             port: 3000
           initialDelaySeconds: 10
+      
+      affinity:
+        podAntiAffinity: 
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                labelSelector:
+                  matchExpressions:
+                    - key: app
+                      operator: In
+                      values:
+                        - nodejs-app
+                topologyKey: "topology.kubernetes.io/zone"
+      volumes:
+        - name: nginx-conf
+          configMap:
+            name: nginx-conf
+        - name: index
+          configMap:
+            name: index
+        - name: secrets # i must mount it so that secretsprovider create the secrets
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes: 
+              secretProviderClass: "db-secrets"

@@ -56,6 +56,7 @@ resource "aws_eks_cluster" "iti_gp_cluster" {
         var.pri_subnet_3_id
      ]
   }
+  
 }
 
 resource "aws_iam_openid_connect_provider" "oidc" {

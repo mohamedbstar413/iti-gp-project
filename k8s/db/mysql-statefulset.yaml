@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql
+  namespace: db-ns
+spec:
+  serviceName: mysql
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      serviceAccountName: "db-secret-sa"
+      initContainers:
+        - name: init #this init container mounts the db-secrets so that the secrets get created before main container
+          image: busybox
+          command: ["sleep", "10"]
+          volumeMounts:
+            - name: secrets
+              mountPath: /mnt/secrets
+      containers:
+      - name: mysql
+        image: mysql
+        ports:
+        - containerPort: 3306
+        env:
+            - name: MYSQL_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: username
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: password
+        volumeMounts:
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql
+        resources:
+          requests:
+            memory: 400Mi
+            cpu: 0.5
+        livenessProbe:
+            tcpSocket:
+                port: 3306
+            initialDelaySeconds: 30
+            periodSeconds: 10
+        readinessProbe:
+            tcpSocket:
+                port: 3306
+            initialDelaySeconds: 15
+            periodSeconds: 10
+      volumes:
+        - name: secrets # i must mount it so that secretsprovider create the secrets
+          csi:
+            driver: secrets-store.csi.k8s.io
+            readOnly: true
+            volumeAttributes:
+              secretProviderClass: "db-secrets"
+        - name: mysql-persistent-storage
+          persistentVolumeClaim:
+            claimName: mysql-pvc

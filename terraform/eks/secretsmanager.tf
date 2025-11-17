@@ -175,3 +175,26 @@ resource "kubectl_manifest" "mysql_secret_provider_back_ns" {
     }
   })
 }
+
+#service account to attach to mysql pod
+resource "kubernetes_service_account" "db_secret_sa" {
+  metadata {
+    name      = "db-secret-sa"
+    namespace = "db-ns"
+    annotations = {
+      "eks.amazonaws.com/role-arn" = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${aws_iam_role.db_secret_role.name}"
+    }
+  }
+} 
+
+
+#service account to attach to backend pods
+resource "kubernetes_service_account" "db_secret_sa_back" {
+  metadata {
+    name      = "db-secret-sa"
+    namespace = "back-ns"
+    annotations = {
+      "eks.amazonaws.com/role-arn" = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${aws_iam_role.db_secret_role.name}"
+    }
+  }
+} 

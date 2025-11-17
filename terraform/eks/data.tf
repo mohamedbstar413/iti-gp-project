@@ -7,7 +7,7 @@ data "aws_iam_role" "cluster_role" {
 }
 
 data "aws_iam_openid_connect_provider" "oidc" {
-  depends_on = [ aws_eks_cluster.iti_gp_cluster ]
+  depends_on = [ aws_eks_cluster.iti_gp_cluster, aws_iam_openid_connect_provider.oidc ]
   url = aws_eks_cluster.iti_gp_cluster.identity[0].oidc[0].issuer
 }
 
