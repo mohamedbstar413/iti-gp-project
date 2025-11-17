@@ -96,4 +96,5 @@ Used to configure a reverse proxy (e.g., Ingress controllers) that:
 
 ![Alt text](../Screenshots/part5/ss5.png)
 
-![Alt text](../Screenshots/part/ss6.png)
+
+![Alt text](../Screenshots/part5/ss6.png)
