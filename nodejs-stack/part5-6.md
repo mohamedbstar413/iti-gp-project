@@ -94,6 +94,6 @@ Used to configure a reverse proxy (e.g., Ingress controllers) that:
 
 ### 🔹 Screen Shots 
 
-![Alt text](iti-gp-project/Screenshots/part5/ss5.png)
+![Alt text](../Screenshots/part5/ss5.png)
 
-![Alt text](iti-gp-project/Screenshots/part5/ss6.png)
+![Alt text](../Screenshots/part/ss6.png)
