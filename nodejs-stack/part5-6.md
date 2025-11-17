@@ -78,7 +78,7 @@ Secrets (e.g., database username/password) are **never hardcoded**. Instead, the
 ### 🔹 Redis (`k8s/redis/`)
 - **Deployment**: Lightweight caching layer for sessions, rate limiting, or query caching.
 - **PVC**: Optional persistence for Redis data .
-- **Service**: Accessible at `redis.redis-ns.svc.cluster.local:6379`.
+- **Service**: `ClusterIP` ,Accessible at `redis.redis-ns.svc.cluster.local:6379`.
 
 ### 🔹 Backend (`k8s/back/`)
 - **Deployment**: Runs the Node.js app from ECR
@@ -87,6 +87,6 @@ Secrets (e.g., database username/password) are **never hardcoded**. Instead, the
 - **Security**: Uses secrets from AWS, liveness/readiness probes, and pod anti-affinity.
 
 ### 🔹 NGINX Config (`terraform/nginx.conf`)
-Used to configure a reverse proxy (e.g., in frontend pods or Ingress controllers) that:
+Used to configure a reverse proxy (e.g., Ingress controllers) that:
 - Serves static assets.
 - Proxies `/api/*` requests to the backend service.
