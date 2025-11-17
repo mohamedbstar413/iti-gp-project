@@ -72,12 +72,12 @@ Secrets (e.g., database username/password) are **never hardcoded**. Instead, the
 ### 🔹 Database (`k8s/db/`)
 - **StatefulSet**: Ensures stable identity and ordered deployment for MySQL.
 - **PV/PVC**: Uses `hostPath` (`/tmp/my-pv`) for local development (same storageClassName).
-- **NetworkPolicy**: Restricts MySQL access **only to backend pods** *(requires `namespaceSelector` fix for cross-namespace traffic)*.
+- **NetworkPolicy**: Restricts MySQL access **only to backend pods**.
 - **Service**: Internal DNS: `mysql.db-ns.svc.cluster.local:3306`.
 
 ### 🔹 Redis (`k8s/redis/`)
 - **Deployment**: Lightweight caching layer for sessions, rate limiting, or query caching.
-- **PVC**: Optional persistence for Redis data (can be disabled for ephemeral cache).
+- **PVC**: Optional persistence for Redis data .
 - **Service**: Accessible at `redis.redis-ns.svc.cluster.local:6379`.
 
 ### 🔹 Backend (`k8s/back/`)
